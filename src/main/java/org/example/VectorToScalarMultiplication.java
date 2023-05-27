@@ -10,16 +10,20 @@ public class VectorToScalarMultiplication {
     private static final boolean USE_LOOPS = true;
     private static final boolean LOG_DEBUG_INFO = false;
 
-    private static int vec = 16 * 100;
+    private static int vec = 16 * 10000;
     private static int scalar1 = 10;
     private static int scalar2 = 2;
+    private static int testCount = 10;
 
     public static void main(String[] args) {
         int A[] = new int[vec];
         for (int i = 0; i < vec; i++) {
             A[i] = i + 1;
         }
-        multiplyVectorByScalar(vec, A);
+
+        for (int i = 0; i < testCount; i++) {
+            multiplyVectorByScalar(vec, A);
+        }
     }
 
     // Function to print Vector
