@@ -8,17 +8,24 @@ import java.util.Arrays;
 public class Main {
     private static VectorSpecies<Integer> SPECIES = IntVector.SPECIES_PREFERRED;
 
+    private static final boolean USE_VECTOR_API = true;
+
     public static void main(String[] args) {
-        int row1 = 4, col1 = 3, row2 = 3, col2 = 4;
+        int row1 = 8, col1 = 8, row2 = 8, col2 = 8;
 
-        int A[][] = { { 1, 1, 1 },
-                { 2, 2, 2 },
-                { 3, 3, 3 },
-                { 4, 4, 4 } };
+        int A[][] = new int[row1][col1];
+        for (int i = 0; i < row1; i++) {
+            for (int j = 0; j < col1; j++) {
+                A[i][j] = i + 1;
+            }
+        }
 
-        int B[][] = { { 1, 1, 1, 1 },
-                { 2, 2, 2, 2 },
-                { 3, 3, 3, 3 } };
+        int B[][] = new int[row1][col1];
+        for (int i = 0; i < row2; i++) {
+            for (int j = 0; j < col2; j++) {
+                B[i][j] = i + 1;
+            }
+        }
 
         multiplyMatrixSIMD(row1, col1, A, row2, col2, B);
     }
@@ -26,8 +33,7 @@ public class Main {
     // Function to print Matrix
     static void printMatrix(int M[][],
                             int rowSize,
-                            int colSize)
-    {
+                            int colSize) {
         for (int i = 0; i < rowSize; i++) {
             for (int j = 0; j < colSize; j++)
                 System.out.print(M[i][j] + " ");
@@ -39,8 +45,7 @@ public class Main {
     // two matrices A[][] and B[][]
     static void multiplyMatrixSIMD(
             int row1, int col1, int A[][],
-            int row2, int col2, int B[][])
-    {
+            int row2, int col2, int B[][]) {
         int i, j, k, l;
 
         // Print the matrices A and B
@@ -60,28 +65,40 @@ public class Main {
         // be of size row1 x col2
         int C[][] = new int[row1][col2];
 
-        for (i = 0; i < row1; i++) {
-            for (j = 0; j < col2; j++) {
-                int[] col1Arr = new int[col2];
-                int[] row2Arr = B[i];
-                int[] mulArr = new int[row1];
-                for (k = 0; k < col2; k++) {
-                    col1Arr[k] = A[k][i];
+        if (USE_VECTOR_API) {
+            for (i = 0; i < row1; i++) {
+                for (j = 0; j < col2; j++) {
+                    int[] col2Arr = new int[row2];
+                    int[] row1Arr = A[i];
+                    int[] mulArr = new int[row1];
+                    for (k = 0; k < row2; k++) {
+                        col2Arr[k] = B[k][j];
+                    }
+
+                    var upperBound = SPECIES.loopBound(col2Arr.length);
+
+                    l = 0;
+                    for (; l < upperBound; l += SPECIES.length()) {
+                        var va = IntVector.fromArray(SPECIES, col2Arr, l);
+                        var vb = IntVector.fromArray(SPECIES, row1Arr, l);
+                        var vc = va.mul(vb);
+                        vc.intoArray(mulArr, l);
+                    }
+
+                    C[i][j] = Arrays.stream(mulArr).sum();
                 }
-
-                var upperBound = SPECIES.loopBound(col1Arr.length);
-
-                l = 0;
-                for (; l < upperBound; l += SPECIES.length()) {
-                    var va = IntVector.fromArray(SPECIES, col1Arr, l);
-                    var vb = IntVector.fromArray(SPECIES, row2Arr, l);
-                    var vc = va.mul(vb);
-                    vc.intoArray(mulArr, l);
+            }
+        } else {
+            for (i = 0; i < row1; i++) {
+                for (j = 0; j < col2; j++) {
+                    for (k = 0; k < row2; k++)
+                        C[i][j] += A[i][k] * B[k][j];
                 }
-
-                C[i][j] = Arrays.stream(mulArr).sum();
             }
         }
+
+
+
 
         // Print the result
         System.out.println("\nResultant Matrix:");
