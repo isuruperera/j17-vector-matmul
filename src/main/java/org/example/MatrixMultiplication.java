@@ -5,14 +5,14 @@ import jdk.incubator.vector.VectorSpecies;
 
 import java.util.Arrays;
 
-public class Main {
+public class MatrixMultiplication {
     private static VectorSpecies<Integer> SPECIES = IntVector.SPECIES_PREFERRED;
 
     private static final boolean USE_VECTOR_API = true;
     private static final boolean USE_NESTED_LOOPS = true;
     private static final boolean LOG_DEBUG_INFO = false;
 
-    private static int row1 = 16, col1 = 16, row2 = 16, col2 = 16;
+    private static int row1 = 16 * 1, col1 = 16 * 1, row2 = 16 * 1, col2 = 16 * 1;
 
     public static void main(String[] args) {
 
@@ -23,7 +23,7 @@ public class Main {
             }
         }
 
-        int B[][] = new int[row1][col1];
+        int B[][] = new int[row2][col2];
         for (int i = 0; i < row2; i++) {
             for (int j = 0; j < col2; j++) {
                 B[i][j] = i + 1;
@@ -96,7 +96,7 @@ public class Main {
                 }
             }
             long endTimeTime = System.currentTimeMillis();
-            System.out.printf("Time taken for MatMul with VectorAPI: %s\n", endTimeTime - startTime);
+            System.out.printf("Time taken for MatMul with VectorAPI: %s ms\n", endTimeTime - startTime);
         }
 
         // Print the result
@@ -116,7 +116,7 @@ public class Main {
                 }
             }
             long endTimeTime = System.currentTimeMillis();
-            System.out.printf("Time taken for MatMul with Nested Loops: %s\n", endTimeTime - startTime);
+            System.out.printf("Time taken for MatMul with Nested Loops: %s ms\n", endTimeTime - startTime);
         }
 
 
