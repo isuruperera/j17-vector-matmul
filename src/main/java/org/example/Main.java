@@ -9,9 +9,10 @@ public class Main {
     private static VectorSpecies<Integer> SPECIES = IntVector.SPECIES_PREFERRED;
 
     private static final boolean USE_VECTOR_API = true;
+    private static final boolean USE_NESTED_LOOPS = true;
     private static final boolean LOG_DEBUG_INFO = false;
 
-    private static int row1 = 2500, col1 = 2500, row2 = 2500, col2 = 2500;
+    private static int row1 = 16, col1 = 16, row2 = 16, col2 = 16;
 
     public static void main(String[] args) {
 
@@ -29,7 +30,7 @@ public class Main {
             }
         }
 
-        multiplyMatrixSIMD(row1, col1, A, row2, col2, B);
+        multiplyMatrix(row1, col1, A, row2, col2, B);
     }
 
     // Function to print Matrix
@@ -45,7 +46,7 @@ public class Main {
 
     // Function to multiply
     // two matrices A[][] and B[][]
-    static void multiplyMatrixSIMD(
+    static void multiplyMatrix(
             int row1, int col1, int A[][],
             int row2, int col2, int B[][]) {
         int i, j, k, l;
@@ -73,9 +74,9 @@ public class Main {
         if (USE_VECTOR_API) {
             long startTime = System.currentTimeMillis();
             for (i = 0; i < row1; i++) {
+                int[] row1Arr = A[i];
                 for (j = 0; j < col2; j++) {
                     int[] col2Arr = new int[row2];
-                    int[] row1Arr = A[i];
                     int[] mulArr = new int[row1];
                     for (k = 0; k < row2; k++) {
                         col2Arr[k] = B[k][j];
@@ -98,15 +99,25 @@ public class Main {
             System.out.printf("Time taken for MatMul with VectorAPI: %s\n", endTimeTime - startTime);
         }
 
-        long startTime = System.currentTimeMillis();
-        for (i = 0; i < row1; i++) {
-            for (j = 0; j < col2; j++) {
-                for (k = 0; k < row2; k++)
-                    C[i][j] += A[i][k] * B[k][j];
-            }
+        // Print the result
+        if (LOG_DEBUG_INFO) {
+            System.out.println("\nResultant Matrix:");
+            printMatrix(C, row1, col2);
         }
-        long endTimeTime = System.currentTimeMillis();
-        System.out.printf("Time taken for MatMul with Nested Loops: %s\n", endTimeTime - startTime);
+
+        C = new int[row1][col2];
+
+        if (USE_NESTED_LOOPS) {
+            long startTime = System.currentTimeMillis();
+            for (i = 0; i < row1; i++) {
+                for (j = 0; j < col2; j++) {
+                    for (k = 0; k < row2; k++)
+                        C[i][j] += A[i][k] * B[k][j];
+                }
+            }
+            long endTimeTime = System.currentTimeMillis();
+            System.out.printf("Time taken for MatMul with Nested Loops: %s\n", endTimeTime - startTime);
+        }
 
 
         // Print the result
